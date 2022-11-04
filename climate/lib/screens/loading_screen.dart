@@ -1,9 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/location.dart';
-import 'package:http/http.dart' as http;
 import 'package:climate/services/networking.dart';
+import 'location_screen.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 const apiKey = '50df4f1124fc34cc9853e9ae0fc83455';
 
@@ -55,17 +55,21 @@ class _LoadingScreenState extends State<LoadingScreen> {
         'http://api.openweathermap.org/geo/1.0/reverse?lat=$latitude&lon=$longitude&limit=5&appid=$apiKey');
 
     var data = await networkHelper.getData();
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return LocationScreen(
+        LocationWeather: data,
+      );
+    }));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {},
-          child: Text('Get Location'),
-        ),
-      ),
-    );
+        body: Center(
+            child: SpinKitDoubleBounce(
+      color: Colors.white,
+      size: 100.0,
+    )));
   }
 }
