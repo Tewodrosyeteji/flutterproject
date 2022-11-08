@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AddTasksScreen extends StatelessWidget {
-  const AddTasksScreen({super.key});
+  final Function addTaskList;
+
+  AddTasksScreen(this.addTaskList);
+  String? newTaskList;
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +33,17 @@ class AddTasksScreen extends StatelessWidget {
             TextField(
               textAlign: TextAlign.center,
               autofocus: true,
+              onChanged: (value) {
+                newTaskList = value;
+              },
             ),
             SizedBox(
               height: 10.0,
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                addTaskList(newTaskList);
+              },
               style: ButtonStyle(
                   backgroundColor:
                       MaterialStateProperty.all(Colors.lightBlueAccent)),
