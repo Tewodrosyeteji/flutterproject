@@ -5,30 +5,29 @@ void main() {
   runApp(ProviderScope(
     child: MaterialApp(
       title: 'Flutter Demo',
-      darkTheme: ThemeData.dark(),
       themeMode: ThemeMode.dark,
+      darkTheme: ThemeData.dark(),
       home: const HomePage(),
     ),
   ));
 }
 
-final currentDate = Provider<DateTime>((ref) => DateTime.now());
+final dateTime = Provider<DateTime>(
+  (ref) => DateTime.now(),
+);
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final date = ref.watch(currentDate);
+    final date = ref.watch(dateTime);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home page'),
+        title: const Text('DateTime Provider'),
       ),
       body: Center(
-        child: Text(
-          date.toIso8601String(),
-          style: Theme.of(context).textTheme.headline6,
-        ),
+        child: Text(date.toIso8601String()),
       ),
     );
   }

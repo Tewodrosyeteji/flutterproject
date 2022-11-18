@@ -19,17 +19,20 @@ const names = [
   'halid',
   'abrham',
   'abrela',
+  'kindu',
 ];
 
-final tickerProvoder = StreamProvider(
+final tickerProvider = StreamProvider(
   ((ref) => Stream.periodic(
-        const Duration(seconds: 1),
-        (i) => i + 1,
+        const Duration(
+          seconds: 1,
+        ),
+        ((i) => i + 1),
       )),
 );
 
 final nameProvider = StreamProvider(
-  ((ref) => ref.watch(tickerProvoder.stream).map(
+  ((ref) => ref.read(tickerProvider.stream).map(
         (count) => names.getRange(0, count),
       )),
 );
@@ -41,20 +44,26 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final names = ref.watch(nameProvider);
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Home page'),
-        ),
-        body: names.when(
-            data: (names) {
-              return ListView.builder(
-                itemBuilder: ((context, index) => ListTile(
-                      title: Text(names.toString()),
-                    )),
+      appBar: AppBar(
+        title: const Text('Stream Provider'),
+      ),
+      body: names.when(
+        data: ((names) {
+          return ListView.builder(
+            itemCount: names.length,
+            itemBuilder: ((context, index) {
+              print(index);
+              return ListTile(
+                title: Text(names.elementAt(index)),
               );
-            },
-            error: ((error, stackTrace) => const Text('reach the end list')),
-            loading: (() => const Center(
-                  child: CircularProgressIndicator(),
-                ))));
+            }),
+          );
+        }),
+        error: (error, stackTrace) => const Text('reach the limit'),
+        loading: (() => const Center(
+              child: CircularProgressIndicator(),
+            )),
+      ),
+    );
   }
 }
