@@ -12,7 +12,7 @@ void main() {
   ));
 }
 
-extension OptionalInfixAddtion<T extends num> on T? {
+extension optionalInfxAddtion<T extends num> on T? {
   T? operator +(T? other) {
     final shadow = this;
     if (shadow != null) {
@@ -25,12 +25,18 @@ extension OptionalInfixAddtion<T extends num> on T? {
 
 class Counter extends StateNotifier<int?> {
   Counter() : super(null);
-  void increment() => state = state == null ? 1 : state + 1;
+  void increment() {
+    state = state == null ? 1 : state + 1;
+  }
 }
 
-final counterProvider = StateNotifierProvider<Counter, int?>(
-  (ref) => Counter(),
+final countProvider = StateNotifierProvider<Counter, int?>(
+  ((ref) => Counter()),
 );
+
+void onPress(WidgetRef ref) {
+  ref.read(countProvider.notifier).increment();
+}
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -41,18 +47,20 @@ class HomePage extends ConsumerWidget {
       appBar: AppBar(
         title: Consumer(
           builder: (context, ref, child) {
-            final count = ref.watch(counterProvider);
-            final text = count == null ? 'press the button' : count.toString();
+            final count = ref.watch(countProvider);
+            final text =
+                count == null ? 'Press to Increment' : count.toString();
             return Text(text);
           },
+          child: const Text('Home page'),
         ),
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TextButton(
-              child: Text('increment count'),
-              onPressed: ref.read(counterProvider.notifier).increment),
+            onPressed: (() => onPress(ref)),
+            child: const Text('Increment count '),
+          )
         ],
       ),
     );
