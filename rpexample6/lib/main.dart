@@ -13,100 +13,97 @@ void main() {
 }
 
 @immutable
-class Film {
+class Films {
   final String id;
   final String title;
   final String description;
-  final bool isFavorite;
+  final bool isfavorite;
 
-  const Film({
+  const Films({
     required this.id,
     required this.title,
     required this.description,
-    required this.isFavorite,
+    required this.isfavorite,
   });
 
-  Film copy({required bool isFavorite}) => Film(
+  Films copy({required bool isfavorite}) => Films(
         id: id,
         title: title,
         description: description,
-        isFavorite: isFavorite,
+        isfavorite: isfavorite,
       );
 
   @override
   String toString() =>
-      'Film(id=$id,title=$title,description=$description,isFavorite=$isFavorite)';
+      'Films(id=$id, title=$title,descriiption=$description,isFavorite=$isfavorite)';
 
   @override
-  bool operator ==(covariant Film other) =>
-      id == other.id && isFavorite == other.isFavorite;
+  bool operator ==(covariant Films other) =>
+      id == other.id && isfavorite == other.isfavorite;
 
   @override
-  int get hashCode => Object.hashAll([
-        id,
-        isFavorite,
-      ]);
+  int get hashCode => Object.hashAll([id, isfavorite]);
 }
 
-const allfilms = [
-  Film(
-    id: "1",
-    title: "title 1",
-    description: "description 1",
-    isFavorite: false,
+const allFilms = [
+  Films(
+    id: '1',
+    title: 'title 1',
+    description: 'description 1',
+    isfavorite: false,
   ),
-  Film(
-    id: "2",
-    title: "title 2",
-    description: "description 2",
-    isFavorite: false,
+  Films(
+    id: '2',
+    title: 'title 2',
+    description: 'description 2',
+    isfavorite: false,
   ),
-  Film(
-    id: "2",
-    title: "title 3",
-    description: "description 3",
-    isFavorite: false,
+  Films(
+    id: '3',
+    title: 'title 3',
+    description: 'description 3',
+    isfavorite: false,
   ),
-  Film(
-    id: "4",
-    title: "title 4",
-    description: "description 4",
-    isFavorite: false,
+  Films(
+    id: '4',
+    title: 'title 4',
+    description: 'description 4',
+    isfavorite: false,
   ),
 ];
 
-class FilmNotifier extends StateNotifier<List<Film>> {
-  FilmNotifier() : super(allfilms);
+class FilmNotifier extends StateNotifier<List<Films>> {
+  FilmNotifier() : super(allFilms);
 
-  void update(Film film, bool isfavorite) {
+  void update(Films films, bool isfavorite) {
     state = state
-        .map((thisFilm) => thisFilm.id == film.id
-            ? thisFilm.copy(isFavorite: isfavorite)
-            : thisFilm)
+        .map((thisfilm) => thisfilm.id == films.id
+            ? thisfilm.copy(isfavorite: isfavorite)
+            : thisfilm)
         .toList();
   }
 }
 
-enum favoriteStatus {
+enum FavoriteStatus {
   all,
-  favorite,
-  unfavorite,
+  favorrite,
+  unFavorite,
 }
 
-final favoriteStatusProvider = StateProvider<favoriteStatus>(
-  (_) => favoriteStatus.all,
+final favoriteStateprovider = StateProvider<FavoriteStatus>(
+  ((_) => FavoriteStatus.all),
 );
 
-final allFilmsProvider = StateNotifierProvider<FilmNotifier, List<Film>>(
-  (_) => FilmNotifier(),
+final allFilmProvider = StateNotifierProvider<FilmNotifier, List<Films>>(
+  ((_) => FilmNotifier()),
 );
 
-final favoriteFilmsProvider = Provider<Iterable<Film>>(
-  ((ref) => ref.watch(allFilmsProvider).where((film) => film.isFavorite)),
+final favoriteFilmProvider = Provider<Iterable<Films>>(
+  (ref) => ref.watch(allFilmProvider).where((film) => film.isfavorite),
 );
 
-final unFavoriteFilmsProvider = Provider<Iterable<Film>>(
-  ((ref) => ref.watch(allFilmsProvider).where((film) => !film.isFavorite)),
+final unFavoriteFilmProvider = Provider<Iterable<Films>>(
+  (ref) => ref.watch(allFilmProvider).where((film) => !film.isfavorite),
 );
 
 class HomePage extends ConsumerWidget {
@@ -119,18 +116,16 @@ class HomePage extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          FilmFilter(),
+          const FilterWidget(),
           Consumer(builder: ((context, ref, child) {
-            final filter = ref.watch(favoriteStatusProvider);
+            final filter = ref.watch(favoriteStateprovider);
             switch (filter) {
-              case favoriteStatus.all:
-                return FilmWidget(provider: allFilmsProvider);
-
-              case favoriteStatus.favorite:
-                return FilmWidget(provider: favoriteFilmsProvider);
-
-              case favoriteStatus.unfavorite:
-                return FilmWidget(provider: unFavoriteFilmsProvider);
+              case FavoriteStatus.all:
+                return FilmList(provider: allFilmProvider);
+              case FavoriteStatus.favorrite:
+                return FilmList(provider: favoriteFilmProvider);
+              case FavoriteStatus.unFavorite:
+                return FilmList(provider: unFavoriteFilmProvider);
             }
           }))
         ],
@@ -139,48 +134,46 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-class FilmWidget extends ConsumerWidget {
-  final AlwaysAliveProviderBase<Iterable<Film>> provider;
-  const FilmWidget({required this.provider, super.key});
+class FilmList extends ConsumerWidget {
+  final AlwaysAliveProviderBase<Iterable<Films>> provider;
+  const FilmList({required this.provider, super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final films = ref.watch(provider);
     return Expanded(
-        child: ListView.builder(
-      itemCount: films.length,
-      itemBuilder: ((context, index) {
-        final film = films.elementAt(index);
-        final favoriteIcon = film.isFavorite
-            ? Icon(Icons.favorite)
-            : Icon(Icons.favorite_border);
-        return ListTile(
-          title: Text(film.title),
-          subtitle: Text(film.description),
-          trailing: IconButton(
-            icon: favoriteIcon,
-            onPressed: () {
-              final isFavorite = !film.isFavorite;
-              ref.watch(allFilmsProvider.notifier).update(
-                    film,
-                    isFavorite,
-                  );
-            },
-          ),
-        );
-      }),
-    ));
+      child: ListView.builder(
+        itemCount: films.length,
+        itemBuilder: ((context, index) {
+          final film = films.elementAt(index);
+          final favoriteIcon = film.isfavorite
+              ? const Icon(Icons.favorite)
+              : const Icon(Icons.favorite_border);
+          return ListTile(
+            title: Text(film.title),
+            subtitle: Text(film.description),
+            trailing: IconButton(
+              icon: favoriteIcon,
+              onPressed: (() {
+                final isfavorite = !film.isfavorite;
+                ref.read(allFilmProvider.notifier).update(film, isfavorite);
+              }),
+            ),
+          );
+        }),
+      ),
+    );
   }
 }
 
-class FilmFilter extends StatelessWidget {
-  const FilmFilter({super.key});
+class FilterWidget extends StatelessWidget {
+  const FilterWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Consumer(builder: ((context, ref, child) {
       return DropdownButton(
-        value: ref.watch(favoriteStatusProvider),
-        items: favoriteStatus.values
+        value: ref.watch(favoriteStateprovider),
+        items: FavoriteStatus.values
             .map(
               (fs) => DropdownMenuItem(
                 value: fs,
@@ -188,8 +181,8 @@ class FilmFilter extends StatelessWidget {
               ),
             )
             .toList(),
-        onChanged: (favoriteStatus? fs) {
-          ref.read(favoriteStatusProvider.notifier).state = fs!;
+        onChanged: (fs) {
+          ref.read(favoriteStateprovider.notifier).state = fs!;
         },
       );
     }));
